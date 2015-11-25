@@ -15,6 +15,9 @@ find_package(catkin REQUIRED
 	ar_pose
 )
 
+catkin_package()
+
+
 include_directories(${catkin_INCLUDE_DIRS} include)
 
 add_executable(ar_docking
