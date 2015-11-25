@@ -12,7 +12,6 @@ find_package(catkin REQUIRED
 	resource_retriever
 	image_transport
 	cv_bridge
-	message_generation
 	ar_pose
 )
 

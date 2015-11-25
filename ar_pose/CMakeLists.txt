@@ -16,6 +16,7 @@ find_package(catkin REQUIRED
 )
 
 
+
 add_message_files(
   DIRECTORY msg
   FILES
@@ -26,6 +27,11 @@ add_message_files(
 generate_messages(DEPENDENCIES
 	geometry_msgs
 )
+
+catkin_package(
+)
+
+
 
 include_directories(${catkin_INCLUDE_DIRS} include)
 

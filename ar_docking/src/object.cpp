@@ -30,7 +30,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#include "ar_pose/object.h"
+#include "ar_docking/object.h"
 
 namespace ar_object
 {
