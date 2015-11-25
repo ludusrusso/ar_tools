@@ -33,7 +33,7 @@ int main (int argc, char **argv)
   ros::Rate r(10);
   while (ros::ok()) {
     arSingle.getImage();
-    ros::spin();
+    ros::spinOnce();
   }
   return 0;
 }
@@ -264,7 +264,7 @@ namespace ar_pose
       ROS_INFO ("     Quat qx: %3.5f qy: %3.5f qz: %3.5f qw: %3.5f", quat[0], quat[1], quat[2], quat[3]);
 
       /* TODO: code for controlling*/
-      computeCmdVel(quat, rot);
+      computeCmdVel(quat, pos);
 
 
 
