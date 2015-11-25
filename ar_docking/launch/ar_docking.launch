@@ -1,0 +1,12 @@
+<launch>
+  <node name="ar_docking" pkg="ar_docking" type="ar_docking" respawn="false"
+    output="screen">
+    <param name="marker_pattern" type="string"
+      value="$(find ar_pose)/data/4x4/4x4_1.patt"/>
+    <param name="marker_width" type="double" value="152.4"/>
+    <param name="marker_center_x" type="double" value="0.0"/>
+    <param name="marker_center_y" type="double" value="0.0"/>
+    <param name="threshold" type="int" value="100"/>
+    <param name="use_history" type="bool" value="true"/>
+  </node>
+</launch>
