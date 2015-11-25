@@ -207,7 +207,7 @@ namespace ar_pose
      * ARToolKit configure option (see config.h).*/
 
 
-    dataPtr = (ARUint8 *) ((IplImage) *cvRetrieveFrame(video_capture_)).imageData;
+    dataPtr = (ARUint8 *) ((IplImage) *cvQueryFrame(video_capture_)).imageData;
 
     // detect the markers in the video frame 
     if (arDetectMarker (dataPtr, threshold_, &marker_info, &marker_num) < 0)
