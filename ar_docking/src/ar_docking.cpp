@@ -40,13 +40,12 @@ int main (int argc, char **argv)
 
 namespace ar_pose
 {
-  ARDockingPublisher::ARDockingPublisher (ros::NodeHandle & n):n_ (n), it_ (n_)
+  ARDockingPublisher::ARDockingPublisher (ros::NodeHandle & n):n_ (n)
   {
 
-    video_capture_ = cvCaptureFromCAM(0);
     std::string local_path;
     std::string package_path = ros::package::getPath (ROS_PACKAGE_NAME);
-	std::string default_path = "data/patt.hiro";
+	  std::string default_path = "data/patt.hiro";
     ros::NodeHandle n_param ("~");
     XmlRpc::XmlRpcValue xml_marker_center;
 
@@ -66,8 +65,7 @@ namespace ar_pose
     // If mode=0, we use arGetTransMat instead of arGetTransMatCont
     // The arGetTransMatCont function uses information from the previous image
     // frame to reduce the jittering of the marker
-    if (!n_param.getParam("use_history", useHistory_))
-      useHistory_ = true;
+    if (!n_param.getParam("use_history", useHistory_)) useHistory_ = true;
     ROS_INFO("\tUse history: %d", useHistory_);
 
 //     n_param.param ("marker_pattern", local_path, std::string ("data/patt.hiro"));
@@ -91,22 +89,15 @@ namespace ar_pose
 
     // **** subscribe
 
-    ROS_INFO ("Subscribing to info topic");
-    //sub_ = n_.subscribe (cameraInfoTopic_, 1, &ARSinglePublisher::camInfoCallback, this);
+    ROS_INFO ("Subscribing to cmd_vel topic");
     vel_pub_ = n_.advertise<geometry_msgs::Twist>("/kobra/cmd_vel", 1000);
     getCamInfo_ = false;
     
-    // **** advertsie 
-
-    arMarkerPub_   = n_.advertise<ar_pose::ARMarker>("ar_pose_marker", 0);
-    if(publishVisualMarkers_){ 
-		rvizMarkerPub_ = n_.advertise<visualization_msgs::Marker>("visualization_marker", 0);
-	 }
   }
 
   ARDockingPublisher::~ARDockingPublisher (void)
   {
-    //cvReleaseImage(&capture); //Don't know why but crash when release the image
+    cvReleaseCapture(&video_capture_); //Don't know why but crash when release the image
     arVideoCapStop ();
     arVideoClose ();
   }
@@ -135,19 +126,13 @@ namespace ar_pose
       cam_param_.mat[2][3] = 0.0f;
 
      
-    cam_param_.dist_factor[0] = -0.134662;       // x0 = cX from openCV calibration
+      cam_param_.dist_factor[0] = -0.134662;       // x0 = cX from openCV calibration
       cam_param_.dist_factor[1] = 0.0f;       // y0 = cY from openCV calibration
-      //if ( cam_info_.distortion_model == "plumb_bob" && cam_info_.D.size() == 5)
-        cam_param_.dist_factor[2] = -100*3.074795;// f = -100*k1 from CV. Note, we had to do mm^2 to m^2, hence 10^8->10^2
-      //else
-      //  cam_param_.dist_factor[2] = 0;                  // We don't know the right value, so ignore it
-
+      cam_param_.dist_factor[2] = -100*3.074795;// f = -100*k1 from CV. Note, we had to do mm^2 to m^2, hence 10^8->10^2
       cam_param_.dist_factor[3] = 1.0;                  // scale factor, should probably be >1, but who cares...
        
       arInit();
-
-      ROS_INFO ("Subscribing to image topic");
-      //cam_sub_ = it_.subscribe (cameraImageTopic_, 1, &ARSinglePublisher::getTransformationCallback, this);
+      video_capture_ = cvCaptureFromCAM(0);
       getCamInfo_ = true;
     }
   }
@@ -169,13 +154,7 @@ namespace ar_pose
     }
 
     sz_ = cvSize (cam_param_.xsize, cam_param_.ysize);
-#if ROS_VERSION_MINIMUM(1, 9, 0)
-// FIXME: Why is this not in the object
-    cv_bridge::CvImagePtr capture_;
-#else
-// DEPRECATED: Fuerte support ends when Hydro is released
-    capture_ = cvCreateImage (sz_, IPL_DEPTH_8U, 4);
-#endif
+
 
   }
 
@@ -228,7 +207,7 @@ namespace ar_pose
         if (k == -1)
           k = i;
         else if (marker_info[k].cf < marker_info[i].cf)
-          k = i;
+          k = i;s
       }
     }
 
@@ -260,8 +239,8 @@ namespace ar_pose
       quat[2] = -arQuat[2];
       quat[3] = arQuat[3];
 
-      ROS_INFO (" QUAT: Pos x: %3.5f  y: %3.5f  z: %3.5f", pos[0], pos[1], pos[2]);
-      ROS_INFO ("     Quat qx: %3.5f qy: %3.5f qz: %3.5f qw: %3.5f", quat[0], quat[1], quat[2], quat[3]);
+      ROS_DEBUG (" QUAT: Pos x: %3.5f  y: %3.5f  z: %3.5f", pos[0], pos[1], pos[2]);
+      ROS_DEBUG ("     Quat qx: %3.5f qy: %3.5f qz: %3.5f qw: %3.5f", quat[0], quat[1], quat[2], quat[3]);
 
       /* TODO: code for controlling*/
       computeCmdVel(quat, pos);

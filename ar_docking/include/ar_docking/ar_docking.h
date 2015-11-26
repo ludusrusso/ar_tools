@@ -35,30 +35,12 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <ros/console.h>
-#include <geometry_msgs/TransformStamped.h>
-#include <tf/transform_broadcaster.h>
-#include <image_transport/image_transport.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <visualization_msgs/Marker.h>
+#include <geometry_msgs/Twist.h>
 #include <resource_retriever/retriever.h>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
-#if ROS_VERSION_MINIMUM(1, 9, 0)
-  // new cv_bridge API in Groovy
-  #include <cv_bridge/cv_bridge.h>
-  #include <sensor_msgs/image_encodings.h>
-#else
-  // Fuerte support for cv_bridge will be deprecated
-  #if defined(__GNUC__)
-    #warning "Support for the old cv_bridge API (Fuerte) is derecated and will be removed when Hydro is released."
-  #endif
-  #include <cv_bridge/CvBridge.h>
-#endif
-
-
-#include <ar_pose/ARMarker.h>
 
 const double AR_TO_ROS = 0.001;
 
@@ -78,24 +60,7 @@ namespace ar_pose
     void computeCmdVel(double quat[4], double pos[3]);
 
     ros::NodeHandle n_;
-    ros::Subscriber sub_;
-    tf::TransformBroadcaster broadcaster_;
-    ros::Publisher arMarkerPub_;
 
-    ar_pose::ARMarker ar_pose_marker_;
-    image_transport::ImageTransport it_;
-    image_transport::Subscriber cam_sub_;
-#if ! ROS_VERSION_MINIMUM(1, 9, 0)
-    sensor_msgs::CvBridge bridge_;
-#endif
-    // sensor_msgs::CameraInfo cam_info_;
-
-    // **** parameters
-
-    //std::string cameraFrame_;
-    std::string markerFrame_;
-    bool publishTf_;
-    bool publishVisualMarkers_;
     bool useHistory_;
     int threshold_;
     double markerWidth_;        // Size of the AR Marker in mm
@@ -107,10 +72,6 @@ namespace ar_pose
 
     double marker_center_[2];   // Physical Center of the Marker
     double marker_trans_[3][4]; // Marker Transform
-
-    // **** for visualisation in rviz
-    ros::Publisher rvizMarkerPub_;
-    visualization_msgs::Marker rvizMarker_;
     
     ros::Publisher vel_pub_;
 
@@ -119,13 +80,6 @@ namespace ar_pose
     CvSize sz_;
 
     CvCapture * video_capture_;
-
-#if ROS_VERSION_MINIMUM(1, 9, 0)
-    cv_bridge::CvImagePtr capture_;
-#else
-    IplImage *capture_;
-#endif
-
   };                            // end class ARSinglePublisher
 }                               // end namespace ar_pose
 
