@@ -167,7 +167,7 @@ namespace ar_pose
     if (docking_state_ == HOMING) {
       msg.angular.z = lambda_ * cmd_t + kt * (pos[0]/pos[2]);
       msg.linear.x = lambda_ * cmd_x + kx * (pos[2]);
-      if (pos[2] < 1.0f) docking_state_ = CONNECTING;
+      if (pos[2] < 2.2f) docking_state_ = CONNECTING;
     } else if (docking_state_ == CONNECTING) {
       msg.linear.x = 0.5f;
     } else {
