@@ -161,7 +161,7 @@ namespace ar_pose
     static double cmd_x = 0.0;
     
     double lambda_ = 0.2;
-    double kt = -1.0f, kx = -0.1;
+    double kt = -2.0f, kx = -0.05;
     geometry_msgs::Twist msg;
 
     if (docking_state_ == HOMING) {
@@ -238,7 +238,7 @@ namespace ar_pose
       quat[3] = arQuat[3];
 
       ROS_DEBUG (" QUAT: Pos x: %3.5f  y: %3.5f  z: %3.5f", pos[0], pos[1], pos[2]);
-      ROS_DEBUG ("     Quat qx: %3.5f qy: %3.5f qz: %3.5f qw: %3.5f", quat[0], quat[1], quat[2], quat[3]);
+      ROS_INFO ("     Quat qx: %3.5f qy: %3.5f qz: %3.5f qw: %3.5f", quat[0], quat[1], quat[2], quat[3]);
 
       computeCmdVel(quat, pos);
 
