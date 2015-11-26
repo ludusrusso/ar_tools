@@ -46,6 +46,16 @@ const double AR_TO_ROS = 0.001;
 
 namespace ar_pose
 {
+
+    enum DockingState {
+      SEARCHING,
+      HOMING,
+      CONNECTING,
+      NONE
+    };
+
+
+
   class ARDockingPublisher
   {
   public:
@@ -80,6 +90,10 @@ namespace ar_pose
     CvSize sz_;
 
     CvCapture * video_capture_;
+
+
+
+    DockingState docking_state_;
   };                            // end class ARSinglePublisher
 }                               // end namespace ar_pose
 

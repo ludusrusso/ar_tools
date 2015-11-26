@@ -131,6 +131,7 @@ namespace ar_pose
       arInit();
       video_capture_ = cvCaptureFromCAM(0);
       getCamInfo_ = true;
+      docking_state_ = HOMING;
     }
   }
 
@@ -160,14 +161,18 @@ namespace ar_pose
     static double cmd_x = 0.0;
     
     double lambda_ = 0.2;
-    double kt = -1.0f, kx = -0.03;
-
-    double t = lambda_ * cmd_t + kt * (pos[0]/pos[2]);
-    double x = lambda_ * cmd_x + kx * (pos[2]);
-
+    double kt = -1.0f, kx = -0.1;
     geometry_msgs::Twist msg;
-    msg.linear.x  = x; 
-    msg.angular.z = t;
+
+    if (docking_state_ == HOMING) {
+      msg.angular.z = lambda_ * cmd_t + kt * (pos[0]/pos[2]);
+      msg.linear.x = lambda_ * cmd_x + kx * (pos[2]);
+      if (pos[2] < 1.0f) docking_state_ = CONNECTING;
+    } else if (docking_state_ == CONNECTING) {
+      msg.linear.x = 0.5f;
+    } else {
+
+    }
     vel_pub_.publish(msg);
   }
 
