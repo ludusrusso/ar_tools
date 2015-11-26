@@ -3,7 +3,7 @@
     output="screen">
     <param name="marker_pattern" type="string"
       value="$(find ar_pose)/data/4x4/4x4_77.patt"/>
-    <param name="marker_width" type="double" value="152.4"/>
+    <param name="marker_width" type="double" value="205.0"/>
     <param name="marker_center_x" type="double" value="0.0"/>
     <param name="marker_center_y" type="double" value="0.0"/>
     <param name="threshold" type="int" value="100"/>
