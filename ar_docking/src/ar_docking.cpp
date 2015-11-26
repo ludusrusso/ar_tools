@@ -164,12 +164,15 @@ namespace ar_pose
     double kt = -2.0f, kx = -0.05;
     geometry_msgs::Twist msg;
 
+    if (pos[2] < 0.01f) return;
+
     if (docking_state_ == HOMING) {
       msg.angular.z = lambda_ * cmd_t + kt * (pos[0]/pos[2]);
       msg.linear.x = lambda_ * cmd_x + kx * (pos[2]);
       if (pos[2] < 3.0f && pos[2] > 0.1f) docking_state_ = CONNECTING;
     } else if (docking_state_ == CONNECTING) {
       msg.linear.x = -0.2f;
+      ROS_INFO("CONNECTING");
     } else {
 
     }
