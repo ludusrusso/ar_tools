@@ -156,7 +156,7 @@ namespace ar_pose
   }
 
   void ARDockingPublisher::computeCmdVel(double quat[4], double pos[3]) {
-    static double cmd_t = 0.0
+    static double cmd_t = 0.0;
     static double cmd_x = 0.0;
     
     double lambda_ = 0.2;
@@ -200,7 +200,7 @@ namespace ar_pose
         if (k == -1)
           k = i;
         else if (marker_info[k].cf < marker_info[i].cf)
-          k = i;s
+          k = i;
       }
     }
 
