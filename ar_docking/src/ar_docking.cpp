@@ -247,6 +247,9 @@ namespace ar_pose
     {
       contF = 0;
       ROS_DEBUG ("Failed to locate marker");
+      double quat[4] = {0}, pos[3] = {0};
+      computeCmdVel(quat, pos);
+
     }
   }
 }                               // end namespace ar_pose
