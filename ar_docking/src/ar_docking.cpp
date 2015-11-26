@@ -68,9 +68,6 @@ namespace ar_pose
     if (!n_param.getParam("use_history", useHistory_)) useHistory_ = true;
     ROS_INFO("\tUse history: %d", useHistory_);
 
-//     n_param.param ("marker_pattern", local_path, std::string ("data/patt.hiro"));
-//     sprintf (pattern_filename_, "%s/%s", package_path.c_str (), local_path.c_str ());
-//     ROS_INFO ("\tMarker Pattern Filename: %s", pattern_filename_);
 
 	//modifications to allow patterns to be loaded from outside the package
 	n_param.param ("marker_pattern", local_path, default_path);
@@ -126,8 +123,8 @@ namespace ar_pose
       cam_param_.mat[2][3] = 0.0f;
 
      
-      cam_param_.dist_factor[0] = -0.134662;       // x0 = cX from openCV calibration
-      cam_param_.dist_factor[1] = 0.0f;       // y0 = cY from openCV calibration
+      cam_param_.dist_factor[0] = 388.027807;       // x0 = cX from openCV calibration
+      cam_param_.dist_factor[1] = 100.421511;       // y0 = cY from openCV calibration
       cam_param_.dist_factor[2] = -100*3.074795;// f = -100*k1 from CV. Note, we had to do mm^2 to m^2, hence 10^8->10^2
       cam_param_.dist_factor[3] = 1.0;                  // scale factor, should probably be >1, but who cares...
        
@@ -159,9 +156,11 @@ namespace ar_pose
   }
 
   void ARDockingPublisher::computeCmdVel(double quat[4], double pos[3]) {
-    double lambda_ = 0.5;
-    double kt = -0.5, kx = -0.5;
-    static double cmd_t = 0.0, cmd_x = 0.0;
+    static double cmd_t = 0.0
+    static double cmd_x = 0.0;
+    
+    double lambda_ = 0.2;
+    double kt = -1.0f, kx = -0.03;
 
     double t = lambda_ * cmd_t + kt * (pos[0]/pos[2]);
     double x = lambda_ * cmd_x + kx * (pos[2]);
@@ -179,12 +178,6 @@ namespace ar_pose
     ARMarkerInfo *marker_info;
     int marker_num;
     int i, k;
-
-    /* Get the image from ROSTOPIC
-     * NOTE: the dataPtr format is BGR because the ARToolKit library was
-     * build with V4L, dataPtr format change according to the 
-     * ARToolKit configure option (see config.h).*/
-
 
     dataPtr = (ARUint8 *) ((IplImage) *cvQueryFrame(video_capture_)).imageData;
 
@@ -242,10 +235,7 @@ namespace ar_pose
       ROS_DEBUG (" QUAT: Pos x: %3.5f  y: %3.5f  z: %3.5f", pos[0], pos[1], pos[2]);
       ROS_DEBUG ("     Quat qx: %3.5f qy: %3.5f qz: %3.5f qw: %3.5f", quat[0], quat[1], quat[2], quat[3]);
 
-      /* TODO: code for controlling*/
       computeCmdVel(quat, pos);
-
-
 
     }
     else
@@ -255,4 +245,3 @@ namespace ar_pose
     }
   }
 }                               // end namespace ar_pose
-
