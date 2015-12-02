@@ -203,12 +203,12 @@ namespace ar_pose
 
 
   bool ARDockingPublisher::startStopCb(ar_msgs::ARDocking::Request &req, ar_msgs::ARDocking::Response &res) {
-    if (req.cmd == 1) {
+    if (req.cmd.data == 1) {
       startDocking();
     } else {
       stopDocking();
     }
-  res.res = true;
+  res.res.data = true;
   return true;
   }
 
