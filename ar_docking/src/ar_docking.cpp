@@ -99,7 +99,7 @@ namespace ar_pose
     vel_pub_ = n_.advertise<geometry_msgs::Twist>("/kobra/cmd_vel", 1000);
     getCamInfo_ = false;
 
-    ros::Subscriber power_sub = n.subscribe("/npb/power_info", 1000, ARDockingPublisher::powerInfoCb, self);
+    ros::Subscriber power_sub = n.subscribe("/npb/power_info", 1000, ARDockingPublisher::powerInfoCb, this);
   }
 
   ARDockingPublisher::~ARDockingPublisher (void)
