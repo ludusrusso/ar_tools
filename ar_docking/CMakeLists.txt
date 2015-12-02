@@ -15,6 +15,7 @@ find_package(catkin REQUIRED
 	ar_pose
 	camera_info_manager
 	npb
+	ar_msgs
 )
 
 catkin_package()

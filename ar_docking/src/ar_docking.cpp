@@ -134,37 +134,15 @@ namespace ar_pose
      
       cam_param_.dist_factor[0] = cam.K[2];       // x0 = cX from openCV calibration
       cam_param_.dist_factor[1] = cam.K[5];       // y0 = cY from openCV calibration
-      if ( cam.distortion_model == "plumb_bob" && cam.D.size() == 5)
+      if ( cam.distortion_model == "plumb_bob" && cam.D.size() == 5) {
         cam_param_.dist_factor[2] = -100*cam.D[0];// f = -100*k1 from CV. Note, we had to do mm^2 to m^2, hence 10^8->10^2
-      else
+      }
+      else {
         cam_param_.dist_factor[2] = 0;                  // We don't know the right value, so ignore it
+      }
 
       cam_param_.dist_factor[3] = 1.0;                  // scale factor, should probably be >1, but who cares...
 
-/*
-      cam_param_.xsize = 640;
-      cam_param_.ysize = 480;
-
-
-      cam_param_.mat[0][0] = 3172.382324;
-      cam_param_.mat[1][0] = 0.0f;
-      cam_param_.mat[2][0] = 0.0f;
-      cam_param_.mat[0][1] = 0.0f;
-      cam_param_.mat[1][1] = 2910.931152;
-      cam_param_.mat[2][1] = 0.0f;
-      cam_param_.mat[0][2] = 393.145612;
-      cam_param_.mat[1][2] = 93.576396;
-      cam_param_.mat[2][2] = 1.0f;
-      cam_param_.mat[0][3] = 0.0f;
-      cam_param_.mat[1][3] = 0.0f;
-      cam_param_.mat[2][3] = 0.0f;
-
-     
-      cam_param_.dist_factor[0] = 388.027807;       // x0 = cX from openCV calibration
-      cam_param_.dist_factor[1] = 100.421511;       // y0 = cY from openCV calibration
-      cam_param_.dist_factor[2] = -100*3.074795;// f = -100*k1 from CV. Note, we had to do mm^2 to m^2, hence 10^8->10^2
-      cam_param_.dist_factor[3] = 1.0;                  // scale factor, should probably be >1, but who cares...
-       */
       arInit();
       video_capture_ = cvCaptureFromCAM(0);
       getCamInfo_ = true;

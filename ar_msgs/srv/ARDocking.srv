@@ -1,0 +1,3 @@
+std_msgs/UInt8 cmd
+---
+std_msgs/Bool res

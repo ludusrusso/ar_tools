@@ -41,9 +41,10 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <camera_info_manager/camera_info_manager.h>
- #include <npb/MsgPowerInfo.h>
+#include <npb/MsgPowerInfo.h> 
+#include <ar_msgs/ARDocking.h>
 
-
+ 
 const double AR_TO_ROS = 0.001;
 
 namespace ar_pose
@@ -73,7 +74,7 @@ namespace ar_pose
     void arInit ();
 
     void powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg);
-
+    bool add(beginner_tutorials::AddTwoInts::Request  &req, beginner_tutorials::AddTwoInts::Response &res)
     ros::NodeHandle n_;
 
     bool useHistory_;
