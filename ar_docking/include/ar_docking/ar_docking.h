@@ -104,6 +104,7 @@ namespace ar_pose
 
 
     DockingState docking_state_;
+    ros::Subscriber power_sub_;
   };                            // end class ARSinglePublisher
 }                               // end namespace ar_pose
 
