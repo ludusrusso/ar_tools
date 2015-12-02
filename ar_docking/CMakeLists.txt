@@ -14,6 +14,7 @@ find_package(catkin REQUIRED
 	cv_bridge
 	ar_pose
 	camera_info_manager
+	npb
 )
 
 catkin_package()
