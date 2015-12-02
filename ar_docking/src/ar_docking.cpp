@@ -213,9 +213,10 @@ namespace ar_pose
   }
 
   void ARDockingPublisher::powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg) {
-    if (msg->dock_state == 2 ){
+    if (msg->dock_state != 0 ){
       docking_state_ = CONNECTED;
-    }   
+    }
+    ROS_INFO("state power: %d", msg->dock_state);
   }
 
 
