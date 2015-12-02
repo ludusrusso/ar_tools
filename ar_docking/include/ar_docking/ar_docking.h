@@ -40,6 +40,8 @@
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <camera_info_manager/camera_info_manager.h>
+ #include <npb/MsgPowerInfo>
 
 
 const double AR_TO_ROS = 0.001;
@@ -51,6 +53,7 @@ namespace ar_pose
       SEARCHING,
       HOMING,
       CONNECTING,
+      CONNECTED,
       NONE
     };
 
@@ -63,11 +66,13 @@ namespace ar_pose
     ~ARDockingPublisher (void);
     void setCamParameter ();
     void getImage ();
+    void computeCmdVel(double quat[4], double pos[3]);
 
   private:
+
     void arInit ();
 
-    void computeCmdVel(double quat[4], double pos[3]);
+    void powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg)
 
     ros::NodeHandle n_;
 
@@ -91,6 +96,11 @@ namespace ar_pose
 
     CvCapture * video_capture_;
 
+
+    std::string cam_info_file_;
+    double lambda_; // = 0.2;
+    double kt_; // = -2.0f, 
+    double kx_; // = -0.05;
 
 
     DockingState docking_state_;

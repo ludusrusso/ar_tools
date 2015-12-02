@@ -13,6 +13,7 @@ find_package(catkin REQUIRED
 	image_transport
 	cv_bridge
 	ar_pose
+	camera_info_manager
 )
 
 catkin_package()

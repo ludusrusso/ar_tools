@@ -40,6 +40,8 @@ int main (int argc, char **argv)
 
 namespace ar_pose
 {
+
+
   ARDockingPublisher::ARDockingPublisher (ros::NodeHandle & n):n_ (n)
   {
 
@@ -84,12 +86,20 @@ namespace ar_pose
     n_param.param ("marker_center_y", marker_center_[1], 0.0);
     ROS_INFO ("\tMarker Center: (%.1f,%.1f)", marker_center_[0], marker_center_[1]);
 
+    n_param.param ("filter_lambda", lambda_, 0.2);
+    n_param.param ("filter_kx", kx_, -2.0);
+    n_param.param ("filter_kt", kt_, -0.05);
+    n_param.param<std::string>("cam_info_file", cam_info_file_, "file:///home/ludovico/Desktop/camera.yaml");
+    
+
+
     // **** subscribe
 
     ROS_INFO ("Subscribing to cmd_vel topic");
     vel_pub_ = n_.advertise<geometry_msgs::Twist>("/kobra/cmd_vel", 1000);
     getCamInfo_ = false;
-    
+
+    ros::Subscriber power_sub = n.subscribe("/npb/power_info", 1000, ARDockingPublisher::powerInfoCb, self);
   }
 
   ARDockingPublisher::~ARDockingPublisher (void)
@@ -103,8 +113,35 @@ namespace ar_pose
   {
     if (!getCamInfo_)
     {
-      //cam_info_ = (*cam_info);
+      camera_info_manager::CameraInfoManager cam_info(n_, "camera", cam_info_file_);
+      sensor_msgs::CameraInfo cam = cam_info.getCameraInfo();
 
+      cam_param_.xsize = cam.width;
+      cam_param_.ysize = cam.height;
+      
+      cam_param_.mat[0][0] = cam.P[0];
+      cam_param_.mat[1][0] = cam.P[4];
+      cam_param_.mat[2][0] = cam.P[8];
+      cam_param_.mat[0][1] = cam.P[1];
+      cam_param_.mat[1][1] = cam.P[5];
+      cam_param_.mat[2][1] = cam.P[9];
+      cam_param_.mat[0][2] = cam.P[2];
+      cam_param_.mat[1][2] = cam.P[6];
+      cam_param_.mat[2][2] = cam.P[10];
+      cam_param_.mat[0][3] = cam.P[3];
+      cam_param_.mat[1][3] = cam.P[7];
+      cam_param_.mat[2][3] = cam.P[11];
+     
+      cam_param_.dist_factor[0] = cam.K[2];       // x0 = cX from openCV calibration
+      cam_param_.dist_factor[1] = cam.K[5];       // y0 = cY from openCV calibration
+      if ( cam.distortion_model == "plumb_bob" && cam.D.size() == 5)
+        cam_param_.dist_factor[2] = -100*cam.D[0];// f = -100*k1 from CV. Note, we had to do mm^2 to m^2, hence 10^8->10^2
+      else
+        cam_param_.dist_factor[2] = 0;                  // We don't know the right value, so ignore it
+
+      cam_param_.dist_factor[3] = 1.0;                  // scale factor, should probably be >1, but who cares...
+
+/*
       cam_param_.xsize = 640;
       cam_param_.ysize = 480;
 
@@ -127,7 +164,7 @@ namespace ar_pose
       cam_param_.dist_factor[1] = 100.421511;       // y0 = cY from openCV calibration
       cam_param_.dist_factor[2] = -100*3.074795;// f = -100*k1 from CV. Note, we had to do mm^2 to m^2, hence 10^8->10^2
       cam_param_.dist_factor[3] = 1.0;                  // scale factor, should probably be >1, but who cares...
-       
+       */
       arInit();
       video_capture_ = cvCaptureFromCAM(0);
       getCamInfo_ = true;
@@ -152,29 +189,33 @@ namespace ar_pose
     }
 
     sz_ = cvSize (cam_param_.xsize, cam_param_.ysize);
-
-
   }
 
   void ARDockingPublisher::computeCmdVel(double quat[4], double pos[3]) {
     static double cmd_t = 0.0;
     static double cmd_x = 0.0;
     
-    double lambda_ = 0.2;
-    double kt = -2.0f, kx = -0.05;
     geometry_msgs::Twist msg;
 
     if (docking_state_ == HOMING && pos[2] > 0.01f) {
-      msg.angular.z = lambda_ * cmd_t + kt * (pos[0]/pos[2]);
-      msg.linear.x = lambda_ * cmd_x + kx * (pos[2]);
+      msg.angular.z = lambda_ * cmd_t + kt_ * (pos[0]/pos[2]);
+      msg.linear.x = lambda_ * cmd_x + kx_ * (pos[2]);
       if (pos[2] < 3.0f && pos[2] > 0.1f) docking_state_ = CONNECTING;
     } else if (docking_state_ == CONNECTING) {
       msg.linear.x = -0.15f;
       ROS_INFO("CONNECTING");
+    } else if (docking_state_ == CONNECTED) {
+      ROS_INFO("CONNECTED");
     } else {
 
     }
     vel_pub_.publish(msg);
+  }
+
+  void ARDockingPublisher::powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg) {
+    if (msg->dock_state == 2 ){
+      docking_state_ = CONNECTED;
+    }   
   }
 
 
