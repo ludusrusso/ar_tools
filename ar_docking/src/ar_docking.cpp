@@ -207,7 +207,7 @@ namespace ar_pose
         last_lin = msg.linear.x;
       }
     } else if (docking_state_ == CONNECTING) {
-      last_lin = 0.9*last_lin + 0.1*-0.15f;
+      last_lin = 0.7*last_lin + 0.1*-0.15f;
       msg.linear.x = last_lin;
       ROS_INFO("CONNECTING");
     } else if (docking_state_ == CONNECTED) {
