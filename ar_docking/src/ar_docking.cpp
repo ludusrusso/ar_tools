@@ -197,12 +197,18 @@ namespace ar_pose
     
     geometry_msgs::Twist msg;
 
+    static double last_lin  =0.0f;
+
     if (docking_state_ == HOMING && pos[2] > 0.01f) {
       msg.angular.z = lambda_ * cmd_t + kt_ * (pos[0]/pos[2]);
       msg.linear.x = lambda_ * cmd_x + kx_ * (pos[2]);
-      if (pos[2] < 3.0f && pos[2] > 0.1f) docking_state_ = CONNECTING;
+      if (pos[2] < 3.0f && pos[2] > 0.1f) {
+        docking_state_ = CONNECTING;
+        last_lin = msg.linear.x;
+      }
     } else if (docking_state_ == CONNECTING) {
-      msg.linear.x = -0.15f;
+      last_lin = 0.9*last_lin + 0.1*-0.15f;
+      msg.linear.x = last_lin;
       ROS_INFO("CONNECTING");
     } else if (docking_state_ == CONNECTED) {
       ROS_INFO("CONNECTED");
