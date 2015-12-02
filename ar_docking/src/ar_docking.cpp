@@ -40,11 +40,8 @@ int main (int argc, char **argv)
 
 namespace ar_pose
 {
-
-
   ARDockingPublisher::ARDockingPublisher (ros::NodeHandle & n):n_ (n)
   {
-
     std::string local_path;
     std::string package_path = ros::package::getPath (ROS_PACKAGE_NAME);
 	  std::string default_path = "data/patt.hiro";
@@ -97,7 +94,6 @@ namespace ar_pose
 
     ROS_INFO ("Subscribing to cmd_vel topic");
     vel_pub_ = n_.advertise<geometry_msgs::Twist>("/kobra/cmd_vel", 1000);
-    getCamInfo_ = false;
 
     power_sub_ = n_.subscribe<npb::MsgPowerInfo>("/npb/power_info", 1000, &ARDockingPublisher::powerInfoCb, this);
   }
@@ -109,10 +105,8 @@ namespace ar_pose
     arVideoClose ();
   }
 
-    void ARDockingPublisher::setCamParameter ()
+  void ARDockingPublisher::setCamParameter ()
   {
-    if (!getCamInfo_)
-    {
       camera_info_manager::CameraInfoManager cam_info(n_, "camera", cam_info_file_);
       sensor_msgs::CameraInfo cam = cam_info.getCameraInfo();
 
@@ -145,9 +139,7 @@ namespace ar_pose
 
       arInit();
       video_capture_ = cvCaptureFromCAM(0);
-      getCamInfo_ = true;
-      docking_state_ = HOMING;
-    }
+      startDocking();
   }
 
   void ARDockingPublisher::arInit ()
@@ -169,13 +161,21 @@ namespace ar_pose
     sz_ = cvSize (cam_param_.xsize, cam_param_.ysize);
   }
 
+  void ARDockingPublisher::startDocking() {
+    docking_state_ = HOMING;
+  }
+
+  void ARDockingPublisher::stopDocking() {
+    docking_state_ = NONE;
+  }
+
   void ARDockingPublisher::computeCmdVel(double quat[4], double pos[3]) {
     static double cmd_t = 0.0;
     static double cmd_x = 0.0;
     
     geometry_msgs::Twist msg;
 
-    static double last_lin  =0.0f;
+    static double last_lin = 0.0f;
 
     if (docking_state_ == HOMING && pos[2] > 0.01f) {
       msg.angular.z = lambda_ * cmd_t + kt_ * (pos[0]/pos[2]);
@@ -187,9 +187,7 @@ namespace ar_pose
     } else if (docking_state_ == CONNECTING) {
       last_lin = 0.7*last_lin + 0.1*-0.15f;
       msg.linear.x = last_lin;
-      ROS_INFO("CONNECTING");
     } else if (docking_state_ == CONNECTED) {
-      ROS_INFO("CONNECTED");
     } else {
 
     }
@@ -201,6 +199,17 @@ namespace ar_pose
       docking_state_ = CONNECTED;
     }
     ROS_INFO("state power: %d", msg->dock_state);
+  }
+
+
+  bool ARDockingPublisher::startStopCb(ar_msgs::ARDocking::Request &req, ar_msgs::ARDocking::Response &res) {
+    if (req.cmd == 1) {
+      startDocking();
+    } else if {
+      stopDocking();
+    }
+  res.res = true;
+  return true;
   }
 
 

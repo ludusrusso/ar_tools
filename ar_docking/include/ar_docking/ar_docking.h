@@ -44,7 +44,7 @@
 #include <npb/MsgPowerInfo.h> 
 #include <ar_msgs/ARDocking.h>
 
- 
+
 const double AR_TO_ROS = 0.001;
 
 namespace ar_pose
@@ -73,6 +73,11 @@ namespace ar_pose
 
     void arInit ();
 
+    void startDocking();
+    void stopDocking();
+
+    bool startStopCb(ar_msgs::ARDocking::Request &req, ar_msgs::ARDocking::Response &res);
+
     void powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg);
     bool add(beginner_tutorials::AddTwoInts::Request  &req, beginner_tutorials::AddTwoInts::Response &res)
     ros::NodeHandle n_;
@@ -92,7 +97,6 @@ namespace ar_pose
     ros::Publisher vel_pub_;
 
     int contF;
-    bool getCamInfo_;
     CvSize sz_;
 
     CvCapture * video_capture_;
