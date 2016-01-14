@@ -30,17 +30,13 @@ int main (int argc, char **argv)
   ros::NodeHandle n;
   ar_pose::ARDockingPublisher arSingle(n);
   arSingle.setCamParameter();
-  ros::Rate r(10);
-  while (ros::ok()) {
-    arSingle.getImage();
-    ros::spinOnce();
-  }
+  ros::spin ();
   return 0;
 }
 
 namespace ar_pose
 {
-  ARDockingPublisher::ARDockingPublisher (ros::NodeHandle & n):n_ (n)
+  ARDockingPublisher::ARDockingPublisher (ros::NodeHandle & n):n_ (n), it_ (n_)
   {
     std::string local_path;
     std::string package_path = ros::package::getPath (ROS_PACKAGE_NAME);
@@ -99,6 +95,8 @@ namespace ar_pose
 
     power_sub_ = n_.subscribe<npb::MsgPowerInfo>("/npb/power_info", 1000, &ARDockingPublisher::powerInfoCb, this);
 
+
+
     ROS_INFO ("Creating Service start_stop_docking");
     start_stop_service_ = n_.advertiseService("/start_stop_docking", &ARDockingPublisher::startStopCb, this);
 
@@ -107,7 +105,6 @@ namespace ar_pose
 
   ARDockingPublisher::~ARDockingPublisher (void)
   {
-    cvReleaseCapture(&video_capture_); //Don't know why but crash when release the image
     arVideoCapStop ();
     arVideoClose ();
   }
@@ -145,7 +142,9 @@ namespace ar_pose
       cam_param_.dist_factor[3] = 1.0;                  // scale factor, should probably be >1, but who cares...
 
       arInit();
-      video_capture_ = cvCaptureFromCAM(0);
+
+      cam_sub_ = it_.subscribe (cameraImageTopic_, 1, &ARSinglePublisher::getTransformationCallback, this);
+
   }
 
   void ARDockingPublisher::arInit ()
@@ -223,6 +222,104 @@ namespace ar_pose
   }
 
 
+
+
+  void ARDockingPublisher::getImageCb (const sensor_msgs::ImageConstPtr & image_msg)
+  {
+    ARUint8 *dataPtr;
+    ARMarkerInfo *marker_info;
+    int marker_num;
+    int i, k;
+
+#if ROS_VERSION_MINIMUM(1, 9, 0)
+    try
+    {
+      capture_ = cv_bridge::toCvCopy (image_msg, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+      ROS_ERROR("cv_bridge exception: %s", e.what());
+    }
+    dataPtr = (ARUint8 *) ((IplImage) capture_->image).imageData;
+#else
+    try
+    {
+      capture_ = bridge_.imgMsgToCv (image_msg, "bgr8");
+    }
+    catch (sensor_msgs::CvBridgeException & e)
+    {
+      ROS_ERROR("cv_bridge exception: %s", e.what());
+    }
+    dataPtr = (ARUint8 *) capture_->imageData;
+#endif
+
+    // detect the markers in the video frame 
+    if (arDetectMarker (dataPtr, threshold_, &marker_info, &marker_num) < 0)
+    {
+      ROS_FATAL ("arDetectMarker failed");
+      ROS_BREAK ();             // FIXME: I don't think this should be fatal... -Bill
+    }
+
+    // check for known patterns
+    k = -1;
+    for (i = 0; i < marker_num; i++)
+    {
+      if (marker_info[i].id == patt_id_)
+      {
+        ROS_DEBUG ("Found pattern: %d ", patt_id_);
+
+        // make sure you have the best pattern (highest confidence factor)
+        if (k == -1)
+          k = i;
+        else if (marker_info[k].cf < marker_info[i].cf)
+          k = i;
+      }
+    }
+
+    if (k != -1)
+    {
+      // **** get the transformation between the marker and the real camera
+      double arQuat[4], arPos[3];
+
+      if (!useHistory_ || contF == 0)
+        arGetTransMat (&marker_info[k], marker_center_, markerWidth_, marker_trans_);
+      else
+        arGetTransMatCont (&marker_info[k], marker_trans_, marker_center_, markerWidth_, marker_trans_);
+
+      contF = 1;
+
+      //arUtilMatInv (marker_trans_, cam_trans);
+      arUtilMat2QuatPos (marker_trans_, arQuat, arPos);
+
+      // **** convert to ROS frame
+
+      double quat[4], pos[3];
+    
+      pos[0] = arPos[0] * AR_TO_ROS;
+      pos[1] = arPos[1] * AR_TO_ROS;
+      pos[2] = arPos[2] * AR_TO_ROS;
+
+      quat[0] = -arQuat[0];
+      quat[1] = -arQuat[1];
+      quat[2] = -arQuat[2];
+      quat[3] = arQuat[3];
+
+      ROS_INFO (" QUAT: Pos x: %3.5f  y: %3.5f  z: %3.5f", pos[0], pos[1], pos[2]);
+      ROS_DEBUG ("     Quat qx: %3.5f qy: %3.5f qz: %3.5f qw: %3.5f", quat[0], quat[1], quat[2], quat[3]);
+
+      computeCmdVel(quat, pos);
+
+    }
+    else
+    {
+      contF = 0;
+      ROS_DEBUG ("Failed to locate marker");
+      double quat[4] = {0}, pos[3] = {0};
+      computeCmdVel(quat, pos);
+
+    }
+  }
+}                               // end namespace ar_pose
 
 
 

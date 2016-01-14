@@ -44,6 +44,20 @@
 #include <npb/MsgPowerInfo.h> 
 #include <ar_msgs/ARDocking.h>
 
+#include <image_transport/image_transport.h>
+
+#if ROS_VERSION_MINIMUM(1, 9, 0)
+  // new cv_bridge API in Groovy
+  #include <cv_bridge/cv_bridge.h>
+  #include <sensor_msgs/image_encodings.h>
+#else
+  // Fuerte support for cv_bridge will be deprecated
+  #if defined(__GNUC__)
+    #warning "Support for the old cv_bridge API (Fuerte) is derecated and will be removed when Hydro is released."
+  #endif
+  #include <cv_bridge/CvBridge.h>
+#endif
+
 
 const double AR_TO_ROS = 0.001;
 
@@ -69,7 +83,6 @@ namespace ar_pose
     void getImage ();
     void computeCmdVel(double quat[4], double pos[3]);
 
-    bool startStopCb(ar_msgs::ARDocking::Request &req, ar_msgs::ARDocking::Response &res);
   private:
 
     void arInit ();
@@ -77,6 +90,9 @@ namespace ar_pose
     void startDocking();
     void stopDocking();
 
+
+    void getImageCb (const sensor_msgs::ImageConstPtr & image_msg);
+    bool startStopCb(ar_msgs::ARDocking::Request &req, ar_msgs::ARDocking::Response &res);
 
     void powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg);
     ros::NodeHandle n_;
@@ -98,8 +114,6 @@ namespace ar_pose
     int contF;
     CvSize sz_;
 
-    CvCapture * video_capture_;
-
 
     std::string cam_info_file_;
     double lambda_; // = 0.2;
@@ -111,6 +125,14 @@ namespace ar_pose
 
     DockingState docking_state_;
     ros::Subscriber power_sub_;
+
+    image_transport::ImageTransport it_;
+    image_transport::Subscriber cam_sub_;
+#if ! ROS_VERSION_MINIMUM(1, 9, 0)
+    sensor_msgs::CvBridge bridge_;
+#endif
+    sensor_msgs::CameraInfo cam_info_;
+
   };                            // end class ARSinglePublisher
 }                               // end namespace ar_pose
 
