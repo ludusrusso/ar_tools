@@ -95,7 +95,7 @@ namespace ar_pose
     // **** subscribe
 
     ROS_INFO ("Subscribing to cmd_vel topic");
-    vel_pub_ = n_.advertise<geometry_msgs::Twist>("/kobra/cmd_vel", 1000);
+    vel_pub_ = n_.advertise<geometry_msgs::Twist>("/kobra/locomotion_cmd_vel2", 1000);
 
     power_sub_ = n_.subscribe<npb::MsgPowerInfo>("/npb/power_info", 1000, &ARDockingPublisher::powerInfoCb, this);
 
