@@ -197,6 +197,8 @@ namespace ar_pose
       msg.linear.x = last_lin;
       vel_pub_.publish(msg);
     } else if (docking_state_ == CONNECTED) {
+      docking_state_ = NONE;
+      vel_pub_.publish(msg);
     } else {
 
     }
@@ -219,6 +221,10 @@ namespace ar_pose
   res.res.data = true;
   return true;
   }
+
+
+
+
 
 
   void ARDockingPublisher::getImage ()
