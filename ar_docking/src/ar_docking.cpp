@@ -101,7 +101,7 @@ namespace ar_pose
     power_sub_ = n_.subscribe<npb::MsgPowerInfo>("/npb/power_info", 1000, &ARDockingPublisher::powerInfoCb, this);
 
     ROS_INFO ("Creating Service start_stop_docking");
-    ros::ServiceServer service = n.advertiseService("~start_stop_docking", &ARDockingPublisher::startStopCb, this);
+    ros::ServiceServer service = n.advertiseService("start_stop_docking", &ARDockingPublisher::startStopCb, this);
 
   }
 
