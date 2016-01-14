@@ -143,7 +143,7 @@ namespace ar_pose
 
       arInit();
 
-      cam_sub_ = it_.subscribe (cameraImageTopic_, 1, &ARSinglePublisher::getTransformationCallback, this);
+      cam_sub_ = it_.subscribe ("/camera/image_raw", 1, &ARSinglePublisher::getImageCb, this);
 
   }
 
@@ -323,7 +323,7 @@ namespace ar_pose
 
 
 
-
+/*
   void ARDockingPublisher::getImage ()
   {
     ARUint8 *dataPtr;
@@ -398,5 +398,5 @@ namespace ar_pose
       computeCmdVel(quat, pos);
 
     }
-  }
+  } */
 }                               // end namespace ar_pose
