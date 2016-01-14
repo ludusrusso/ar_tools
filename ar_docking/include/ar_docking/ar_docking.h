@@ -79,7 +79,6 @@ namespace ar_pose
     bool startStopCb(ar_msgs::ARDocking::Request &req, ar_msgs::ARDocking::Response &res);
 
     void powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg);
-    bool add(beginner_tutorials::AddTwoInts::Request  &req, beginner_tutorials::AddTwoInts::Response &res)
     ros::NodeHandle n_;
 
     bool useHistory_;
