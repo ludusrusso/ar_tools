@@ -49,7 +49,6 @@ namespace ar_pose
     XmlRpc::XmlRpcValue xml_marker_center;
 
 
-    stopDocking();
 
     ROS_INFO("Starting ArSinglePublisher");
 
@@ -103,6 +102,7 @@ namespace ar_pose
     ROS_INFO ("Creating Service start_stop_docking");
     start_stop_service_ = n_.advertiseService("/start_stop_docking", &ARDockingPublisher::startStopCb, this);
 
+    stopDocking();
   }
 
   ARDockingPublisher::~ARDockingPublisher (void)
@@ -146,7 +146,6 @@ namespace ar_pose
 
       arInit();
       video_capture_ = cvCaptureFromCAM(0);
-      startDocking();
   }
 
   void ARDockingPublisher::arInit ()
@@ -192,14 +191,15 @@ namespace ar_pose
         docking_state_ = CONNECTING;
         last_lin = msg.linear.x;
       }
+      vel_pub_.publish(msg);
     } else if (docking_state_ == CONNECTING) {
       last_lin = 0.7*last_lin + 0.1*-0.15f;
       msg.linear.x = last_lin;
+      vel_pub_.publish(msg);
     } else if (docking_state_ == CONNECTED) {
     } else {
 
     }
-    vel_pub_.publish(msg);
   }
 
   void ARDockingPublisher::powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg) {

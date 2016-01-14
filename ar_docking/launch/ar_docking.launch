@@ -9,8 +9,8 @@
     <param name="threshold" type="int" value="100"/>
     <param name="use_history" type="bool" value="true"/>
     <param name="filter_lambda" type="double" value="0.2"/>
-    <param name="filter_kx" type="double" value="-2.0"/>
-    <param name="filter_kt" type="double" value="-0.05"/>
+    <param name="filter_kt" type="double" value="-2.0"/>
+    <param name="filter_kx" type="double" value="-0.05"/>
     <param name="cam_info_file" type="string" value="file:///home/rob/.ros/camera_info/camera.yaml"/>  
   </node>
 </launch>
