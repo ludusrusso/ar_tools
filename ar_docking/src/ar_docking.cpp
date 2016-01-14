@@ -101,7 +101,7 @@ namespace ar_pose
     power_sub_ = n_.subscribe<npb::MsgPowerInfo>("/npb/power_info", 1000, &ARDockingPublisher::powerInfoCb, this);
 
     ROS_INFO ("Creating Service start_stop_docking");
-    ros::ServiceServer service = n.advertiseService("start_stop_docking", &ARDockingPublisher::startStopCb, this);
+    start_stop_service_ = n_.advertiseService("/start_stop_docking", &ARDockingPublisher::startStopCb, this);
 
   }
 
@@ -183,6 +183,7 @@ namespace ar_pose
     geometry_msgs::Twist msg;
 
     static double last_lin = 0.0f;
+    ROS_INFO("Docking State: %d", docking_state_);
 
     if (docking_state_ == HOMING && pos[2] > 0.01f) {
       msg.angular.z = lambda_ * cmd_t + kt_ * (pos[0]/pos[2]);

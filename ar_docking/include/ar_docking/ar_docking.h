@@ -69,6 +69,7 @@ namespace ar_pose
     void getImage ();
     void computeCmdVel(double quat[4], double pos[3]);
 
+    bool startStopCb(ar_msgs::ARDocking::Request &req, ar_msgs::ARDocking::Response &res);
   private:
 
     void arInit ();
@@ -76,7 +77,6 @@ namespace ar_pose
     void startDocking();
     void stopDocking();
 
-    bool startStopCb(ar_msgs::ARDocking::Request &req, ar_msgs::ARDocking::Response &res);
 
     void powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg);
     ros::NodeHandle n_;
@@ -105,6 +105,8 @@ namespace ar_pose
     double lambda_; // = 0.2;
     double kt_; // = -2.0f, 
     double kx_; // = -0.05;
+
+    ros::ServiceServer start_stop_service_;
 
 
     DockingState docking_state_;
