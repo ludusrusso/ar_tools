@@ -132,6 +132,12 @@ namespace ar_pose
     sensor_msgs::CvBridge bridge_;
 #endif
     sensor_msgs::CameraInfo cam_info_;
+#if ROS_VERSION_MINIMUM(1, 9, 0)
+    cv_bridge::CvImagePtr capture_;
+#else
+    IplImage *capture_;
+#endif
+
 
   };                            // end class ARSinglePublisher
 }                               // end namespace ar_pose

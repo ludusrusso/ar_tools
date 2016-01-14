@@ -143,7 +143,7 @@ namespace ar_pose
 
       arInit();
 
-      cam_sub_ = it_.subscribe ("/camera/image_raw", 1, &ARSinglePublisher::getImageCb, this);
+      cam_sub_ = it_.subscribe ("/camera/image_raw", 1, &ARDockingPublisher::getImageCb, this);
 
   }
 
