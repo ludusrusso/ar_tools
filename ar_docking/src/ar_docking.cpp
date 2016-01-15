@@ -86,19 +86,27 @@ namespace ar_pose
     n_param.param ("filter_kt", kt_, -0.05);
     n_param.param<std::string>("cam_info_file", cam_info_file_, "file:///home/ludovico/Desktop/camera.yaml");
     
+    n_param.param<std::string>("cmd_vel_topic", cmd_vel_topic_, "/kobra/locomotion_cmd_vel2");
+    n_param.param<std::string>("camera_topic", camera_topic_, "/usb_cam/image_raw");
+    n_param.param<std::string>("power_info_topic", power_info_topic_, "/npb/power_info");
+    n_param.param<std::string>("start_stop_service_name", start_stop_service_name_, "/start_stop_docking");
+
+
+    std::string power_info_topic_;
+    std::string start_stop_service_name_;
 
 
     // **** subscribe
 
     ROS_INFO ("Subscribing to cmd_vel topic");
-    vel_pub_ = n_.advertise<geometry_msgs::Twist>("/kobra/locomotion_cmd_vel2", 1000);
+    vel_pub_ = n_.advertise<geometry_msgs::Twist>(cmd_vel_topic_, 1000);
 
-    power_sub_ = n_.subscribe<npb::MsgPowerInfo>("/npb/power_info", 1000, &ARDockingPublisher::powerInfoCb, this);
+    power_sub_ = n_.subscribe<npb::MsgPowerInfo>(power_info_topic_, 1000, &ARDockingPublisher::powerInfoCb, this);
 
 
 
     ROS_INFO ("Creating Service start_stop_docking");
-    start_stop_service_ = n_.advertiseService("/start_stop_docking", &ARDockingPublisher::startStopCb, this);
+    start_stop_service_ = n_.advertiseService(start_stop_service_name_, &ARDockingPublisher::startStopCb, this);
 
     stopDocking();
   }
@@ -143,7 +151,7 @@ namespace ar_pose
 
       arInit();
 
-      cam_sub_ = it_.subscribe ("/usb_cam/image_raw", 1, &ARDockingPublisher::getImageCb, this);
+      cam_sub_ = it_.subscribe (camera_topic_, 1, &ARDockingPublisher::getImageCb, this);
 
   }
 
@@ -183,7 +191,7 @@ namespace ar_pose
     geometry_msgs::Twist msg;
 
     static double last_lin = 0.0f;
-    ROS_INFO("Docking State: %d", docking_state_);
+    ROS_DEBUG("Docking State: %d", docking_state_);
 
     if (docking_state_ == HOMING && pos[2] > 0.01f) {
       msg.angular.z = lambda_ * cmd_t + kt_ * (pos[0]/pos[2]);
@@ -306,7 +314,7 @@ namespace ar_pose
       quat[2] = -arQuat[2];
       quat[3] = arQuat[3];
 
-      ROS_INFO (" QUAT: Pos x: %3.5f  y: %3.5f  z: %3.5f", pos[0], pos[1], pos[2]);
+      ROS_DEBUG (" QUAT: Pos x: %3.5f  y: %3.5f  z: %3.5f", pos[0], pos[1], pos[2]);
       ROS_DEBUG ("     Quat qx: %3.5f qy: %3.5f qz: %3.5f qw: %3.5f", quat[0], quat[1], quat[2], quat[3]);
 
       computeCmdVel(quat, pos);

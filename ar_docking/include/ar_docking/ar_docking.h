@@ -115,6 +115,11 @@ namespace ar_pose
     CvSize sz_;
 
 
+    std::string cmd_vel_topic_;
+    std::string camera_topic_;
+    std::string power_info_topic_;
+    std::string start_stop_service_name_;
+
     std::string cam_info_file_;
     double lambda_; // = 0.2;
     double kt_; // = -2.0f, 
