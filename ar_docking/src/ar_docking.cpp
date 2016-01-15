@@ -171,6 +171,8 @@ namespace ar_pose
   }
 
   void ARDockingPublisher::stopDocking() {
+    geometry_msgs::Twist msg;
+    vel_pub_.publish(msg);
     docking_state_ = NONE;
   }
 
