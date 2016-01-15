@@ -143,7 +143,7 @@ namespace ar_pose
 
       arInit();
 
-      cam_sub_ = it_.subscribe ("/camera/image_raw", 1, &ARDockingPublisher::getImageCb, this);
+      cam_sub_ = it_.subscribe ("/usb_cam/image_raw", 1, &ARDockingPublisher::getImageCb, this);
 
   }
 
@@ -171,6 +171,8 @@ namespace ar_pose
   }
 
   void ARDockingPublisher::stopDocking() {
+    geometry_msgs::Twist msg;
+    vel_pub_.publish(msg);
     docking_state_ = NONE;
   }
 
@@ -397,6 +399,6 @@ namespace ar_pose
       double quat[4] = {0}, pos[3] = {0};
       computeCmdVel(quat, pos);
 
-    }
-  } */
-}                               // end namespace ar_pose
+    } 
+  } 
+}                               // end namespace ar_pose */
