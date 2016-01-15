@@ -92,10 +92,6 @@ namespace ar_pose
     n_param.param<std::string>("start_stop_service_name", start_stop_service_name_, "/start_stop_docking");
 
 
-    std::string power_info_topic_;
-    std::string start_stop_service_name_;
-
-
     // **** subscribe
 
     ROS_INFO ("Subscribing to cmd_vel topic");

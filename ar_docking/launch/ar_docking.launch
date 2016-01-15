@@ -15,7 +15,7 @@
     <param name="cmd_vel_topic" type="string" value="/kobra/locomotion_cmd_vel2"/>
     <param name="camera_topic" type="string" value="/docking_cam/image_raw"/>
     <param name="power_info_topic" type="string" value="/npb/power_info"/>
-    <param name="start_stop_service_name" type="string" value="docking_service"/>
+    <param name="start_stop_service_name" type="string" value="/docking_service"/>
   </node>
 
   <node name="docking_cam" pkg="usb_cam" type="usb_cam_node" respawn="false">
