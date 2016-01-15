@@ -49,3 +49,12 @@ or/and
 	cd demo/ar_multi/
 	./setup.sh
 	roslaunch demo.launch
+
+------------------------------------------------------------
+Docking:
+------------------------------------------------------------
+roslauch ar_docking ar_docking.launch
+
+you need usb_cam and a camera connected, to select the camera, use the parameter video_device of usb_cam in ar_docking.lauch
+
+You need to place an ar_maker on the docking station, default is num 77.
