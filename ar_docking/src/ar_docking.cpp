@@ -23,6 +23,7 @@
  */
 
 #include "ar_docking/ar_docking.h"
+#include "std_msgs/UInt8.h"
 
 int main (int argc, char **argv)
 {
@@ -101,15 +102,15 @@ namespace ar_pose
     // **** subscribe
 
     ROS_INFO ("Subscribing to cmd_vel topic");
-    vel_pub_ = n_.advertise<geometry_msgs::Twist>("/kobra/locomotion_cmd_vel2", 1000);
+    vel_pub_ = n_.advertise<geometry_msgs::Twist>(cmd_vel_topic_, 1000);
 
-    power_sub_ = n_.subscribe<npb::MsgPowerInfo>("/npb/power_info", 1000, &ARDockingPublisher::powerInfoCb, this);
+    power_sub_ = n_.subscribe<npb::MsgPowerInfo>(power_info_topic_, 1000, &ARDockingPublisher::powerInfoCb, this);
 
 
-    docker_state_pub_ = n_private.advertise<std_msgs/UInt8>("/status", 1000);
+    docker_state_pub_ = n_private.advertise<std_msgs::UInt8>("status", 1000);
 
     ROS_INFO ("Creating Service start_stop_docking");
-    start_stop_service_ = n_.advertiseService("/start_stop_docking", &ARDockingPublisher::startStopCb, this);
+    start_stop_service_ = n_.advertiseService(start_stop_service_name_, &ARDockingPublisher::startStopCb, this);
 
     stopDocking();
   }
@@ -213,9 +214,9 @@ namespace ar_pose
 
     }
 
-    std:msgs::UInt8 stat_msg;
+    std_msgs::UInt8 stat_msg;
     stat_msg.data = docking_state_;
-    docker_state_pub_.pub(stat_msg);
+    docker_state_pub_.publish(stat_msg);
 
 
   }
