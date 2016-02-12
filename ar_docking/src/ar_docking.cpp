@@ -91,7 +91,11 @@ namespace ar_pose
     n_param.param ("filter_kx", kx_, -2.0);
     n_param.param ("filter_kt", kt_, -0.05);
     n_param.param<std::string>("cam_info_file", cam_info_file_, "file:///home/ludovico/Desktop/camera.yaml");
-
+    
+    n_param.param<std::string>("cmd_vel_topic", cmd_vel_topic_, "/kobra/locomotion_cmd_vel");
+    n_param.param<std::string>("camera_topic", camera_topic_, "/usb_cam/image_raw");
+    n_param.param<std::string>("power_info_topic", power_info_topic_, "/npb/power_info");
+    n_param.param<std::string>("start_stop_service_name", start_stop_service_name_, "/start_stop_docking");
 
 
     // **** subscribe
