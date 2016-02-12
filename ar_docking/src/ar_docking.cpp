@@ -23,6 +23,7 @@
  */
 
 #include "ar_docking/ar_docking.h"
+#include "std_msgs/UInt8.h"
 
 int main (int argc, char **argv)
 {
@@ -88,11 +89,10 @@ namespace ar_pose
     n_param.param ("filter_kt", kt_, -0.05);
     n_param.param<std::string>("cam_info_file", cam_info_file_, "file:///home/ludovico/Desktop/camera.yaml");
     
-    n_param.param<std::string>("cmd_vel_topic", cmd_vel_topic_, "/kobra/locomotion_cmd_vel2");
+    n_param.param<std::string>("cmd_vel_topic", cmd_vel_topic_, "/kobra/locomotion_cmd_vel");
     n_param.param<std::string>("camera_topic", camera_topic_, "/usb_cam/image_raw");
     n_param.param<std::string>("power_info_topic", power_info_topic_, "/npb/power_info");
     n_param.param<std::string>("start_stop_service_name", start_stop_service_name_, "/start_stop_docking");
-
 
 
     // **** subscribe
@@ -103,9 +103,7 @@ namespace ar_pose
     power_sub_ = n_.subscribe<npb::MsgPowerInfo>(power_info_topic_, 1000, &ARDockingPublisher::powerInfoCb, this);
 
 
-
-
-    docker_state_pub_ = n_private.advertise<std_msgs/UInt8>("/status", 1000);
+    docker_state_pub_ = n_private.advertise<std_msgs::UInt8>("status", 1000);
 
     ROS_INFO ("Creating Service start_stop_docking");
     start_stop_service_ = n_.advertiseService(start_stop_service_name_, &ARDockingPublisher::startStopCb, this);
@@ -215,9 +213,9 @@ namespace ar_pose
 
     }
 
-    std:msgs::UInt8 stat_msg;
+    std_msgs::UInt8 stat_msg;
     stat_msg.data = docking_state_;
-    docker_state_pub_.pub(stat_msg);
+    docker_state_pub_.publish(stat_msg);
 
 
   }

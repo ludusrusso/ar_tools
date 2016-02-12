@@ -120,7 +120,7 @@ namespace ar_pose
     std::string power_info_topic_;
     std::string start_stop_service_name_;
 
-    std::string cam_info_file_;
+    std::string cam_info_file_, cmd_vel_topic_, camera_topic_, power_info_topic_, start_stop_service_name_;
     double kt_; // = -2.0f,
     double kx_; // = -0.05;
 
