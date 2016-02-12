@@ -41,7 +41,7 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <camera_info_manager/camera_info_manager.h>
-#include <npb/MsgPowerInfo.h> 
+#include <npb/MsgPowerInfo.h>
 #include <ar_msgs/ARDocking.h>
 
 #include <image_transport/image_transport.h>
@@ -108,7 +108,7 @@ namespace ar_pose
 
     double marker_center_[2];   // Physical Center of the Marker
     double marker_trans_[3][4]; // Marker Transform
-    
+
     ros::Publisher vel_pub_;
 
     int contF;
@@ -121,8 +121,7 @@ namespace ar_pose
     std::string start_stop_service_name_;
 
     std::string cam_info_file_;
-    double lambda_; // = 0.2;
-    double kt_; // = -2.0f, 
+    double kt_; // = -2.0f,
     double kx_; // = -0.05;
 
     ros::ServiceServer start_stop_service_;
@@ -144,6 +143,7 @@ namespace ar_pose
 #endif
 
 
+    ros::Publisher docker_state_pub_;
   };                            // end class ARSinglePublisher
 }                               // end namespace ar_pose
 

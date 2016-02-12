@@ -42,6 +42,9 @@ namespace ar_pose
     std::string package_path = ros::package::getPath (ROS_PACKAGE_NAME);
 	  std::string default_path = "data/patt.hiro";
     ros::NodeHandle n_param ("~");
+    ros::NodeHandle n_private ("~");
+
+
     XmlRpc::XmlRpcValue xml_marker_center;
 
 
@@ -81,7 +84,6 @@ namespace ar_pose
     n_param.param ("marker_center_y", marker_center_[1], 0.0);
     ROS_INFO ("\tMarker Center: (%.1f,%.1f)", marker_center_[0], marker_center_[1]);
 
-    n_param.param ("filter_lambda", lambda_, 0.2);
     n_param.param ("filter_kx", kx_, -2.0);
     n_param.param ("filter_kt", kt_, -0.05);
     n_param.param<std::string>("cam_info_file", cam_info_file_, "file:///home/ludovico/Desktop/camera.yaml");
@@ -92,6 +94,7 @@ namespace ar_pose
     n_param.param<std::string>("start_stop_service_name", start_stop_service_name_, "/start_stop_docking");
 
 
+
     // **** subscribe
 
     ROS_INFO ("Subscribing to cmd_vel topic");
@@ -100,6 +103,9 @@ namespace ar_pose
     power_sub_ = n_.subscribe<npb::MsgPowerInfo>(power_info_topic_, 1000, &ARDockingPublisher::powerInfoCb, this);
 
 
+
+
+    docker_state_pub_ = n_private.advertise<std_msgs/UInt8>("/status", 1000);
 
     ROS_INFO ("Creating Service start_stop_docking");
     start_stop_service_ = n_.advertiseService(start_stop_service_name_, &ARDockingPublisher::startStopCb, this);
@@ -120,7 +126,7 @@ namespace ar_pose
 
       cam_param_.xsize = cam.width;
       cam_param_.ysize = cam.height;
-      
+
       cam_param_.mat[0][0] = cam.P[0];
       cam_param_.mat[1][0] = cam.P[4];
       cam_param_.mat[2][0] = cam.P[8];
@@ -133,7 +139,7 @@ namespace ar_pose
       cam_param_.mat[0][3] = cam.P[3];
       cam_param_.mat[1][3] = cam.P[7];
       cam_param_.mat[2][3] = cam.P[11];
-     
+
       cam_param_.dist_factor[0] = cam.K[2];       // x0 = cX from openCV calibration
       cam_param_.dist_factor[1] = cam.K[5];       // y0 = cY from openCV calibration
       if ( cam.distortion_model == "plumb_bob" && cam.D.size() == 5) {
@@ -152,7 +158,7 @@ namespace ar_pose
   }
 
   void ARDockingPublisher::arInit ()
-  {   
+  {
     arInitCparam (&cam_param_);
 
     ROS_INFO ("*** Camera Parameter ***");
@@ -181,17 +187,18 @@ namespace ar_pose
   }
 
   void ARDockingPublisher::computeCmdVel(double quat[4], double pos[3]) {
-    static double cmd_t = 0.0;
-    static double cmd_x = 0.0;
-    
+
+
+
     geometry_msgs::Twist msg;
 
     static double last_lin = 0.0f;
     ROS_DEBUG("Docking State: %d", docking_state_);
 
+
     if (docking_state_ == HOMING && pos[2] > 0.01f) {
-      msg.angular.z = lambda_ * cmd_t + kt_ * (pos[0]/pos[2]);
-      msg.linear.x = lambda_ * cmd_x + kx_ * (pos[2]);
+      msg.angular.z =  kt_ * (pos[0]/pos[2]);
+      msg.linear.x =  kx_ * (pos[2]);
       if (pos[2] < 3.0f && pos[2] > 0.1f) {
         docking_state_ = CONNECTING;
         last_lin = msg.linear.x;
@@ -207,6 +214,12 @@ namespace ar_pose
     } else {
 
     }
+
+    std:msgs::UInt8 stat_msg;
+    stat_msg.data = docking_state_;
+    docker_state_pub_.pub(stat_msg);
+
+
   }
 
   void ARDockingPublisher::powerInfoCb(const npb::MsgPowerInfo::ConstPtr& msg) {
@@ -339,7 +352,7 @@ namespace ar_pose
 
     dataPtr = (ARUint8 *) ((IplImage) *cvQueryFrame(video_capture_)).imageData;
 
-    // detect the markers in the video frame 
+    // detect the markers in the video frame
     if (arDetectMarker (dataPtr, threshold_, &marker_info, &marker_num) < 0)
     {
       ROS_FATAL ("arDetectMarker failed");
@@ -380,7 +393,7 @@ namespace ar_pose
       // **** convert to ROS frame
 
       double quat[4], pos[3];
-    
+
       pos[0] = arPos[0] * AR_TO_ROS;
       pos[1] = arPos[1] * AR_TO_ROS;
       pos[2] = arPos[2] * AR_TO_ROS;
